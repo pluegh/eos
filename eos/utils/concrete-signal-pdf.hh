@@ -167,9 +167,9 @@ namespace eos
                 return DensityPtr(new ConcreteSignalPDF(_name, _parameters.clone(), _kinematics.clone(), _options, _function, _kinematic_ranges));
             }
 
-            virtual DensityPtr clone(const Parameters & parameters) const
+            virtual SignalPDFPtr clone(const Parameters & parameters) const
             {
-                return DensityPtr(new ConcreteSignalPDF(_name, parameters, _kinematics.clone(), _options, _function, _kinematic_ranges));
+                return SignalPDFPtr(new ConcreteSignalPDF(_name, parameters, _kinematics.clone(), _options, _function, _kinematic_ranges));
             }
 
             virtual Density::Iterator begin() const

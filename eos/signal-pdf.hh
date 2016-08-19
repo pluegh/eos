@@ -66,7 +66,7 @@ namespace eos
 
             virtual DensityPtr clone() const = 0;
 
-            virtual DensityPtr clone(const Parameters & parameters) const = 0;
+            virtual SignalPDFPtr clone(const Parameters & parameters) const = 0;
 
             static SignalPDFPtr make(const std::string & name, const Parameters & parameters, const Kinematics & kinematics, const Options & options);
     };
