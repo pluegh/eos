@@ -18,6 +18,7 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <eos/signal-pdf.hh>
 #include <eos/statistics/log-likelihood.hh>
 #include <eos/utils/equation_solver.hh>
 #include <eos/utils/log.hh>
@@ -1106,6 +1107,106 @@ namespace eos
         template struct MultivariateGaussianBlock<22>;
         template struct MultivariateGaussianBlock<36>;
         template struct MultivariateGaussianBlock<48>;
+
+        template <unsigned dim_>
+        struct UnbinnedBlock :
+            public LogLikelihoodBlock
+        {
+            const std::string name;
+
+            const std::shared_ptr<SignalPDF> pdf;
+
+            const Kinematics kinematics;
+
+            const std::array<std::string, dim_> variable_names;
+
+            const std::vector<std::array<double, dim_>> data;
+
+            std::vector<MutablePtr> kinematic_variables;
+
+            UnbinnedBlock(const std::string & name, const std::shared_ptr<SignalPDF> & pdf,
+                    const std::array<std::string, dim_> variable_names,
+                    const std::vector<std::array<double, dim_>> & data) :
+                name(name),
+                pdf(pdf),
+                kinematics(pdf->kinematics()),
+                variable_names(variable_names),
+                data(data)
+            {
+                for (unsigned j = 0 ; j < dim_ ; ++j)
+                {
+                    kinematic_variables.push_back(MutablePtr(new KinematicVariable(kinematics[variable_names[j]])));
+                }
+            }
+
+            virtual ~UnbinnedBlock()
+            {
+            }
+
+            virtual std::string as_string() const
+            {
+                std::string result = "Unbinned: " + name;
+
+                return result;
+            }
+
+            virtual double evaluate() const
+            {
+                double result = 0.0;
+
+                for (auto && event : data)
+                {
+                    for (unsigned j = 0 ; j < dim_ ; ++j)
+                    {
+                        kinematic_variables[j]->set(event[j]);
+                    }
+
+                    result += pdf->evaluate();
+                }
+
+                return result;
+            }
+
+            virtual unsigned number_of_observations() const
+            {
+                // DvD: Unsure as how many observations the Unbinned
+                // Likelihood counts for signifiance tests. See also
+                // comment in significance().
+
+                return 1u;
+            }
+
+            virtual double sample(gsl_rng * rng) const
+            {
+                auto i = gsl_rng_uniform_int(rng, data.size());
+                auto & event = data[i];
+
+                for (unsigned j = 0 ; j < dim_ ; ++j)
+                {
+                    kinematic_variables[j]->set(event[j]);
+                }
+
+                return pdf->evaluate();
+            }
+
+            virtual double significance() const
+            {
+                // DvD: Right now I have no idea how to determine the
+                // significance of the current parameter point with
+                // respect to the true parameter point. Returning quiet_NaN
+                // for now.
+                return std::numeric_limits<double>::quiet_NaN();
+            }
+
+            virtual LogLikelihoodBlockPtr clone(ObservableCache cache) const
+            {
+                return LogLikelihoodBlockPtr(new implementation::UnbinnedBlock<dim_>(name, pdf->clone(cache.parameters()), variable_names, data));
+            }
+        };
+
+        // explicit instantiation
+        template struct UnbinnedBlock<1>;
+        template struct UnbinnedBlock<2>;
     }
 
     LogLikelihoodBlock::~LogLikelihoodBlock()
@@ -1451,6 +1552,23 @@ namespace eos
                                              const std::array<double, 48> & mean, const std::array<double, 48> & variances,
                                              const std::array<std::array<double, 48>, 48> & correlation,
                                              const unsigned & number_of_observations = 48u);
+
+    template <std::size_t n_>
+    LogLikelihoodBlockPtr
+    LogLikelihoodBlock::Unbinned(const std::string & name, const SignalPDFPtr & pdf,
+            const std::array<std::string, n_> variable_names,
+            const std::vector<std::array<double, n_>> & data)
+    {
+        return LogLikelihoodBlockPtr(new implementation::UnbinnedBlock<n_>(name, pdf, variable_names, data));
+    }
+
+    // explicit instantiation
+    template LogLikelihoodBlockPtr LogLikelihoodBlock::Unbinned<1>(const std::string & name, const SignalPDFPtr & pdf,
+            const std::array<std::string, 1> variable_names,
+            const std::vector<std::array<double, 1>> & data);
+    template LogLikelihoodBlockPtr LogLikelihoodBlock::Unbinned<2>(const std::string & name, const SignalPDFPtr & pdf,
+            const std::array<std::string, 2> variable_names,
+            const std::vector<std::array<double, 2>> & data);
 
     template <>
     struct Implementation<LogLikelihood>

@@ -1,7 +1,7 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 /*
- * Copyright (c) 2011, 2013, 2014 Danny van Dyk
+ * Copyright (c) 2011, 2013, 2014, 2016 Danny van Dyk
  * Copyright (c) 2011 Frederik Beaujean
  *
  * This file is part of the EOS project. EOS is free software;
@@ -23,6 +23,7 @@
 
 #include <eos/constraint.hh>
 #include <eos/observable.hh>
+#include <eos/signal-pdf.hh>
 #include <eos/statistics/log-likelihood-fwd.hh>
 #include <eos/utils/matrix.hh>
 #include <eos/utils/observable_cache.hh>
@@ -283,6 +284,20 @@ namespace eos
                                                               const std::array<double, n_> & mean, const std::array<double, n_> & variances,
                                                               const std::array<std::array<double, n_>, n_> & correlation,
                                                               const unsigned & number_of_observations = n_);
+
+            /*!
+             * Create a new LogLikelihoodBlock for an unbinned likelihood using a given PDF.
+             *
+             * @note For every dimension, this template and the corresponding implementation
+             *       have to be instantiated explicitly.
+             *
+             * @param name       The name of this unbinned likelihood.
+             * @param pdf        The SignalPDF whose distribution we model.
+             * @param data       The vector of observed data points.
+             */
+            template <std::size_t n_>
+            static LogLikelihoodBlockPtr Unbinned(const std::string & name, const SignalPDFPtr & pdf,
+                    const std::array<std::string, n_> variable_names, const std::vector<std::array<double, n_>> & data);
 
     };
 
