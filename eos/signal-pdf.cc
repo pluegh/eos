@@ -73,6 +73,11 @@ namespace eos
         return os;
     }
 
+    std::ostream & operator<< (std::ostream & os, const SignalPDFEntry & entry)
+    {
+        return entry.insert(os);
+    }
+
     template <typename Decay_, typename Tuple_, typename ... Args_>
     std::pair<std::string, SignalPDFEntry *> make_signal_pdf(const char * name,
             double (Decay_::* function)(const Args_ & ...) const,
