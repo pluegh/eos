@@ -444,7 +444,7 @@ namespace eos
                ss << *(*b)->primary_test_statistic();
 
                Log::instance()->message("analysis.goodness_of_fit", ll_informational)
-                                << c->name() << ": " << ss.get();
+                                << c->name() << ": " << ss.str();
            }
        }
 
