@@ -1239,6 +1239,13 @@ namespace eos
                 return std::numeric_limits<double>::quiet_NaN();
             }
 
+            virtual TestStatisticPtr primary_test_statistic() const
+            {
+                auto result = new test_statistics::Empty();
+
+                return TestStatisticPtr(result);
+            }
+
             virtual LogLikelihoodBlockPtr clone(ObservableCache cache) const
             {
                 return LogLikelihoodBlockPtr(new implementation::UnbinnedBlock<dim_>(name, pdf->clone(cache.parameters()), variable_names, data));
