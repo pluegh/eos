@@ -95,5 +95,5 @@ jobs:
                 export PYTHONPATH+=":$(make print-pythondir)"
                 popd
                 pushd _src
-                make -C manual/examples examples
+                make -C examples/cli examples
                 popd
