@@ -9,7 +9,7 @@ libeosformfactors_la_SOURCES = \
 	analytic-b-to-pi-pi.hh analytic-b-to-pi-pi.cc \
 	analytic-b-to-p-lcsr.hh analytic-b-to-p-lcsr-impl.hh \
 	analytic-b-to-pi-lcsr.cc  analytic-b-to-k-lcsr.cc  analytic-b-to-d-lcsr.cc \
-	analytic-bs-to-k-lcsr.cc  analytic-bs-to-ds-lcsr.cc \
+	analytic-bs-to-k-lcsr.cc  analytic-bs-to-ds-lcsr.cc analytic-bc-to-d-lcsr.cc \
 	analytic-b-to-v-lcsr.hh analytic-b-to-v-lcsr-impl.hh \
 	analytic-bs-to-kstar-lcsr.cc analytic-bs-to-dsstar-lcsr.cc analytic-bs-to-phi-lcsr.cc \
 	analytic-b-to-rho-lcsr.cc analytic-b-to-kstar-lcsr.cc analytic-b-to-dstar-lcsr.cc \

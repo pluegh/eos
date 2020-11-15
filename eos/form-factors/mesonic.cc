@@ -360,7 +360,8 @@ namespace eos
             { KeyType("B->K::B-LCSR"),        &AnalyticFormFactorBToPLCSR<lcsr::BToK>::make    },
             { KeyType("B->D::B-LCSR"),        &AnalyticFormFactorBToPLCSR<lcsr::BToD>::make    },
             { KeyType("B_s->K::B-LCSR"),      &AnalyticFormFactorBToPLCSR<lcsr::BsToK>::make   },
-            { KeyType("B_s->D_s::B-LCSR"),    &AnalyticFormFactorBToPLCSR<lcsr::BsToDs>::make  }
+            { KeyType("B_s->D_s::B-LCSR"),    &AnalyticFormFactorBToPLCSR<lcsr::BsToDs>::make  },
+            { KeyType("B_c->D::B-LCSR"),      &AnalyticFormFactorBToPLCSR<lcsr::BcToD>::make   }
         };
 
         auto i = form_factors.find(name);
