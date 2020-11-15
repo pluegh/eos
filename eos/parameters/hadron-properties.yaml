@@ -254,6 +254,12 @@ groups:
           max:     +0.2330
           latex:    '$f_{\bar{B}_s^0}$'
           comments: 'GeV, cf. [Fermilab-MILC-2017]'
+      'decay-constant::B_c' :
+          central: +0.422
+          min:     +0.409
+          max:     +0.435
+          latex:    'f_{\bar{B}_c^-}$'
+          comments: 'GeV, cf. [HPQCD:2015B]'
       'decay-constant::K_d' :
           central: +0.1561
           min:     +0.155
