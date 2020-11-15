@@ -394,6 +394,51 @@ namespace eos
 
     // }}}
 
+    // B_c -> P(seudoscalar)
+    // {{{
+
+    // B_c -> D
+    // {{{
+    ObservableGroup
+    make_bc_to_d_form_factors_group()
+    {
+        auto imp = new Implementation<ObservableGroup>(
+            R"(Form factors for $B_c\to D$ transitions)",
+            R"(Pseudo observables representing the full basis of $B_c\to D$ form factors. )"
+            R"(The specific parametrization can be chosen via the "form-factors" option.)",
+            {
+                make_form_factor_adapter("B_c->D::f_+(q2)", R"(f_+^{B_c\to D}(q^2))",
+                        &FormFactors<PToP>::f_p, std::make_tuple("q2")),
+
+                make_form_factor_adapter("B_c->D::f_0(q2)", R"(f_0^{B_c\to D}(q^2))",
+                        &FormFactors<PToP>::f_0, std::make_tuple("q2")),
+
+                make_form_factor_adapter("B_c->D::f_T(q2)", R"(f_T^{B_c\to D}(q^2))",
+                        &FormFactors<PToP>::f_t, std::make_tuple("q2")),
+
+                make_form_factor_adapter("B_c->D::f_-(q2)", R"(f_-^{B_c\to D}(q^2))",
+                        &FormFactors<PToP>::f_m, std::make_tuple("q2")),
+
+                make_observable("B_c->D::f_+[s^1/s^0](q2)",
+                        &AnalyticFormFactorBToPLCSR<lcsr::BcToD>::normalized_moment_1_f_p,
+                        std::make_tuple("q2")),
+
+                make_observable("B_c->D::f_0[s^1/s^0](q2)",
+                        &AnalyticFormFactorBToPLCSR<lcsr::BcToD>::normalized_moment_1_f_pm,
+                        std::make_tuple("q2")),
+
+                make_observable("B_c->D::f_T[s^1/s^0](q2)",
+                        &AnalyticFormFactorBToPLCSR<lcsr::BcToD>::normalized_moment_1_f_t,
+                        std::make_tuple("q2")),
+            }
+        );
+
+        return ObservableGroup(imp);
+    }
+    // }}}
+
+    // }}}
+
     // B -> V(ector)
     // {{{
 
@@ -1319,6 +1364,9 @@ namespace eos
                 // B_s -> P
                 make_bs_to_k_form_factors_group(),
                 make_bs_to_ds_form_factors_group(),
+
+                // B_c -> P
+                make_bc_to_d_form_factors_group(),
 
                 // B -> V
                 make_b_to_rho_form_factors_group(),

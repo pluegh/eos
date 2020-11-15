@@ -36,6 +36,7 @@ namespace eos
         struct BToD;
         struct BsToK;
         struct BsToDs;
+        struct BcToD;
     }
 
     template <typename Process_>
@@ -70,5 +71,6 @@ namespace eos
     extern template class AnalyticFormFactorBToPLCSR<lcsr::BToD>;
     extern template class AnalyticFormFactorBToPLCSR<lcsr::BsToK>;
     extern template class AnalyticFormFactorBToPLCSR<lcsr::BsToDs>;
+    extern template class AnalyticFormFactorBToPLCSR<lcsr::BcToD>;
 }
 #endif
