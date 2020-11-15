@@ -564,6 +564,22 @@ groups:
           min:     +0.03
           max:     +0.09
           comments: 'GeV^2, cf. [NT2011]'
+      # B_c LCDA parameters
+      'B_c::1/lambda_B_p' :
+          central: +2.0
+          min:     +1.5
+          max:     +2.5
+          comments: ' // GeV^{-1}, cf. [?]'
+      'B_c::lambda_E^2' :
+          central: +0.03
+          min:     +0.01
+          max:     +0.05
+          comments: 'GeV^2, cf. [?]'
+      'B_c::lambda_H^2' :
+          central: +0.06
+          min:     +0.03
+          max:     +0.09
+          comments: 'GeV^2, cf. [?]'
   # }}}
 
   # Parameters in the Heavy Quark Exapnsion

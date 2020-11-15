@@ -1,7 +1,7 @@
 /* vim: set sw=4 sts=4 et foldmethod=syntax : */
 
 /*
- * Copyright (c) 2017 Danny van Dyk
+ * Copyright (c) 2017, 2020 Danny van Dyk
  * Copyright (c) 2018 Nico Gubernari
  * Copyright (c) 2018 Ahmet Kokulu
  *
@@ -48,14 +48,31 @@ namespace eos
         {
             qnp::Name name(_name);
 
-            if (opt_q.value() == "s")
-                return QualifiedName(qnp::Prefix("B_s"), name);
+            switch (opt_q.value()[0])
+            {
+                case 's':
+                    return QualifiedName(qnp::Prefix("B_s"), name);
+                    break;
 
-            return QualifiedName(qnp::Prefix("B"), name);
+                case 'c':
+                    return QualifiedName(qnp::Prefix("B_c"), name);
+                    break;
+
+                case 'u':
+                case 'd':
+                    return QualifiedName(qnp::Prefix("B"), name);
+                    break;
+
+                default:
+                    throw InternalError("Unsupported spectator quark flavour in BMesonLCDAs: q=" + opt_q.value());
+                    break;
+            }
+
+            return QualifiedName(qnp::Prefix("internal_error"), qnp::Name("unspecified"));
         }
 
         Implementation(const Parameters & p, const Options & o, ParameterUser & u) :
-            opt_q(o, "q", { "u", "d", "s" }, "u"),
+            opt_q(o, "q", { "u", "d", "s", "c" }, "u"),
             lambda_B_inv(p[parameter("1/lambda_B_p").str()], u),
             lambda_E2(p[parameter("lambda_E^2").str()], u),
             lambda_H2(p[parameter("lambda_H^2").str()], u),
