@@ -78,11 +78,15 @@ groups:
           latex:   '$m_{B^\pm}$'
           comments: 'cf. [PDG-Live], December 2020'
       'mass::B_s' :
-          central: +5.36688
-          min:     +5.36674
-          max:     +5.36702
-          latex:   '$m_{B^0_s}$'
-          comments: 'cf. [PDG-Live], December 2020'
+          central: +5.36677
+          min:     +5.36653
+          max:     +5.36701
+          comments: 'cf. [PDG2012], p. 105'
+      'mass::B_c' :
+          central: +6.2749
+          min:     +6.2741
+          max:     +6.2757
+          comments: 'cf. [PDG2020]'
       # B^* meson masses
       'mass::B_d^*' :
           central: +5.32470
