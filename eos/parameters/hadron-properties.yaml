@@ -582,7 +582,7 @@ groups:
           comments: 'GeV^2, cf. [?]'
   # }}}
 
-  # Parameters in the Heavy Quark Exapnsion
+  # Parameters in the Heavy Quark Expansion
   # {{{
   - title: 'Parameters in the Heavy Quark Expansion'
     description: ''
