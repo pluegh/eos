@@ -27,6 +27,7 @@
 #include <eos/utils/qualified-name.hh>
 
 #include <gsl/gsl_sf_expint.h>
+#include <gsl/gsl_sf_gamma.h>
 
 namespace eos
 {
@@ -105,8 +106,11 @@ namespace eos
         {
             // cf. [KMO2006], eq. (53), p. 16
             const double omega_0 = lambda_B();
+            const double m = 1.6; // spectator quark mass; here: charm quark pole mass
 
-            const double limitWW = 1.0 / omega_0 * std::exp(-omega / omega_0);
+            // const double limitWW = 1.0 / omega_0 * std::exp(-omega / omega_0);
+            const double limitWW = 1.0 / omega_0 * std::exp(-omega / omega_0) * (1.0 + m / omega_0)
+                                 + m / std::pow(omega_0, 2) * gsl_sf_gamma_inc(0.0, omega / omega_0);
             const double nonWW   = -(lambda_E2 - lambda_H2) / (18.0 * pow(omega_0, 5)) *
                 (
                     2.0 * omega_0 * omega_0 - 4.0 * omega_0 * omega + omega * omega
@@ -118,8 +122,15 @@ namespace eos
         inline double phi_bar(const double & omega) const
         {
             const double omega_0 = lambda_B();
+            const double m = 1.6; // spectator quark mass; here: charm quark pole mass
 
-            const double limitWW = -omega / omega_0 * std::exp(-omega / omega_0);
+            // TO BE MODIFIED; cross check m->0.
+            // const double limitWW = -omega / omega_0 * std::exp(-omega / omega_0);
+            const double limitWW = omega / std::pow(omega_0, 2) * 
+                (
+                    m * gsl_sf_gamma_inc(0.0, omega / omega_0)
+                    - omega_0 * std::exp(- omega / omega_0)
+                );
             const double nonWW   = (lambda_E2 - lambda_H2) / (18.0 * pow(omega_0, 4))
                 * (2.0 * omega_0 - omega) * omega * std::exp(-omega / omega_0);
 
