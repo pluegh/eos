@@ -41,6 +41,10 @@ matplotlib.rcParams['ytick.direction'] = 'out'
 
 matplotlib.rcParams['text.usetex'] = True
 
-matplotlib.rcParams['pgf.preamble'] = r'\usepackage[hidelinks]{hyperref}\usepackage{amsmath}\usepackage{xcolor}'
+matplotlib.rcParams['pgf.preamble'] = (
+        r'\usepackage[hidelinks]{hyperref}' +
+        r'\usepackage{amsmath}' +
+        r'\usepackage{xcolor}'
+        )
 
 matplotlib.rcParams['errorbar.capsize'] = 5
