@@ -102,39 +102,49 @@ namespace eos
             return omega / (omega_0 * omega_0) * std::exp(-omega / omega_0);
         }
 
+        // WIP: switch for the charm mass
+        const bool useCharmMass = true;
+        const double m = 1.6; // spectator quark pole mass; here: charm mass
+
         inline double phi_minus(const double & omega) const
         {
             // cf. [KMO2006], eq. (53), p. 16
             const double omega_0 = lambda_B();
-            const double m = 1.6; // spectator quark mass; here: charm quark pole mass
 
-            // const double limitWW = 1.0 / omega_0 * std::exp(-omega / omega_0);
-            const double limitWW = 1.0 / omega_0 * std::exp(-omega / omega_0) * (1.0 + m / omega_0)
-                                 + m / std::pow(omega_0, 2) * gsl_sf_gamma_inc(0.0, omega / omega_0);
+            double limitWW;
+            if(useCharmMass) {
+                limitWW = 1.0 / omega_0 * std::exp(-omega / omega_0) * (1.0 + m / omega_0)
+                        - 1.0 * m / std::pow(omega_0, 2) * gsl_sf_gamma_inc(0.0, omega / omega_0);
+            } else {
+                limitWW = 1.0 / omega_0 * std::exp(-omega / omega_0);
+            }
+
             const double nonWW   = -(lambda_E2 - lambda_H2) / (18.0 * pow(omega_0, 5)) *
                 (
                     2.0 * omega_0 * omega_0 - 4.0 * omega_0 * omega + omega * omega
                 ) * std::exp(-omega / omega_0);
 
-            return limitWW + nonWW;
+            return limitWW;// + nonWW;
         }
 
         inline double phi_bar(const double & omega) const
         {
             const double omega_0 = lambda_B();
-            const double m = 1.6; // spectator quark mass; here: charm quark pole mass
 
-            // TO BE MODIFIED; cross check m->0.
-            // const double limitWW = -omega / omega_0 * std::exp(-omega / omega_0);
-            const double limitWW = omega / std::pow(omega_0, 2) * 
-                (
-                    m * gsl_sf_gamma_inc(0.0, omega / omega_0)
-                    - omega_0 * std::exp(- omega / omega_0)
-                );
+            double limitWW;
+            if(useCharmMass) {
+                limitWW = 1.0 * omega / std::pow(omega_0, 2) * 
+                    (
+                     m * gsl_sf_gamma_inc(0.0, omega / omega_0)
+                     - omega_0 * std::exp(- omega / omega_0)
+                    );
+            } else {
+                limitWW = -omega / omega_0 * std::exp(-omega / omega_0);
+            }
             const double nonWW   = (lambda_E2 - lambda_H2) / (18.0 * pow(omega_0, 4))
                 * (2.0 * omega_0 - omega) * omega * std::exp(-omega / omega_0);
 
-            return limitWW + nonWW;
+            return limitWW; // + nonWW;
         }
 
         inline double phi_bar_d1(const double & omega) const
