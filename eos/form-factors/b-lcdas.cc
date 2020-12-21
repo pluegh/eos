@@ -31,6 +31,8 @@
 
 namespace eos
 {
+    // BMesonLCDAsBase
+    // eos/form-factors/analytic-b-to-p-...hh
     template <>
     struct Implementation<BMesonLCDAs>
     {
@@ -92,29 +94,44 @@ namespace eos
             return 1.0 / lambda_B_inv();
         }
 
+        // WIP: switch for the charm mass
+        const bool useCharmMass = true;
+        const double m = 1.275; // spectator quark pole mass; here: charm mass
+        const double N = 1.75;
+        const double NPrime = -0.75;
+        const double omega_0 = 2.59;
+
         /* Leading twist two-particle LCDAs */
 
         inline double phi_plus(const double & omega) const
         {
             // cf. [KMO2006], eq. (53), p. 16
-            const double omega_0 = lambda_B();
+            // const double omega_0 = lambda_B();
 
-            return omega / (omega_0 * omega_0) * std::exp(-omega / omega_0);
+            return omega / (omega_0 * omega_0) 
+                * (N + NPrime * omega / (2 * omega_0) )
+                * std::exp(-omega / omega_0);
         }
 
-        // WIP: switch for the charm mass
-        const bool useCharmMass = true;
-        const double m = 1.6; // spectator quark pole mass; here: charm mass
+        // to do:
+        // create base class
+        // need abstract base class for the B: 
+        //  -- heavy light state
+        //  -- heavy heavy (our case): no 1/lambda_B
+        //  --> Make parameter sets unrelated
 
         inline double phi_minus(const double & omega) const
         {
             // cf. [KMO2006], eq. (53), p. 16
-            const double omega_0 = lambda_B();
+            // const double omega_0 = lambda_B();
 
             double limitWW;
             if(useCharmMass) {
-                limitWW = 1.0 / omega_0 * std::exp(-omega / omega_0) * (1.0 + m / omega_0)
-                        - 1.0 * m / std::pow(omega_0, 2) * gsl_sf_gamma_inc(0.0, omega / omega_0);
+                limitWW = std::exp(-omega / omega_0) / omega_0 * ((
+                            N * (m / omega_0 + 1.0) + 0.5 * NPrime * (omega / omega_0 + 1.0) * ( (m * (omega - omega_0))/( omega_0 * (omega + omega_0) ) + 1)
+                          )) -
+                          N * m / omega_0 / omega_0 * gsl_sf_gamma_inc(0, omega / omega_0);
+                        ;
             } else {
                 limitWW = 1.0 / omega_0 * std::exp(-omega / omega_0);
             }
@@ -124,27 +141,29 @@ namespace eos
                     2.0 * omega_0 * omega_0 - 4.0 * omega_0 * omega + omega * omega
                 ) * std::exp(-omega / omega_0);
 
-            return limitWW;// + nonWW;
+            return limitWW + nonWW;
         }
 
         inline double phi_bar(const double & omega) const
         {
-            const double omega_0 = lambda_B();
+            // const double omega_0 = lambda_B();
 
             double limitWW;
             if(useCharmMass) {
-                limitWW = 1.0 * omega / std::pow(omega_0, 2) * 
-                    (
-                     m * gsl_sf_gamma_inc(0.0, omega / omega_0)
-                     - omega_0 * std::exp(- omega / omega_0)
-                    );
+                limitWW = N * omega / omega_0 / omega_0 * ( m * gsl_sf_gamma_inc(0, omega / omega_0) - omega_0 * std::exp(-omega / omega_0) )
+                        - NPrime * omega / (2 * omega_0 * omega_0) * std::exp(- omega / omega_0) * (omega + omega_0 - m);
+//                limitWW = 1.0 * omega / std::pow(omega_0, 2) * 
+//                    (
+//                     m * gsl_sf_gamma_inc(0.0, omega / omega_0)
+//                     - omega_0 * std::exp(- omega / omega_0)
+//                    );
             } else {
                 limitWW = -omega / omega_0 * std::exp(-omega / omega_0);
             }
             const double nonWW   = (lambda_E2 - lambda_H2) / (18.0 * pow(omega_0, 4))
                 * (2.0 * omega_0 - omega) * omega * std::exp(-omega / omega_0);
 
-            return limitWW; // + nonWW;
+            return limitWW + nonWW;
         }
 
         inline double phi_bar_d1(const double & omega) const
