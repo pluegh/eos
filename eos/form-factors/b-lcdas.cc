@@ -31,8 +31,6 @@
 
 namespace eos
 {
-    // BMesonLCDAsBase
-    // eos/form-factors/analytic-b-to-p-...hh
     template <>
     struct Implementation<BMesonLCDAs>
     {
@@ -94,48 +92,22 @@ namespace eos
             return 1.0 / lambda_B_inv();
         }
 
-        // WIP: switch for the charm mass
-        const bool useCharmMass = true;
-        const double m = 1.275; // spectator quark pole mass; here: charm mass
-        const double N = 1.75;
-        const double NPrime = -0.75;
-        const double omega_0 = 2.59;
-
         /* Leading twist two-particle LCDAs */
 
         inline double phi_plus(const double & omega) const
         {
             // cf. [KMO2006], eq. (53), p. 16
-            // const double omega_0 = lambda_B();
+            const double omega_0 = lambda_B();
 
-            return omega / (omega_0 * omega_0) 
-                * (N + NPrime * omega / (2 * omega_0) )
-                * std::exp(-omega / omega_0);
+            return omega / (omega_0 * omega_0) * std::exp(-omega / omega_0);
         }
-
-        // to do:
-        // create base class
-        // need abstract base class for the B: 
-        //  -- heavy light state
-        //  -- heavy heavy (our case): no 1/lambda_B
-        //  --> Make parameter sets unrelated
 
         inline double phi_minus(const double & omega) const
         {
             // cf. [KMO2006], eq. (53), p. 16
-            // const double omega_0 = lambda_B();
+            const double omega_0 = lambda_B();
 
-            double limitWW;
-            if(useCharmMass) {
-                limitWW = std::exp(-omega / omega_0) / omega_0 * ((
-                            N * (m / omega_0 + 1.0) + 0.5 * NPrime * (omega / omega_0 + 1.0) * ( (m * (omega - omega_0))/( omega_0 * (omega + omega_0) ) + 1)
-                          )) -
-                          N * m / omega_0 / omega_0 * gsl_sf_gamma_inc(0, omega / omega_0);
-                        ;
-            } else {
-                limitWW = 1.0 / omega_0 * std::exp(-omega / omega_0);
-            }
-
+            const double limitWW = 1.0 / omega_0 * std::exp(-omega / omega_0);
             const double nonWW   = -(lambda_E2 - lambda_H2) / (18.0 * pow(omega_0, 5)) *
                 (
                     2.0 * omega_0 * omega_0 - 4.0 * omega_0 * omega + omega * omega
@@ -146,20 +118,9 @@ namespace eos
 
         inline double phi_bar(const double & omega) const
         {
-            // const double omega_0 = lambda_B();
+            const double omega_0 = lambda_B();
 
-            double limitWW;
-            if(useCharmMass) {
-                limitWW = N * omega / omega_0 / omega_0 * ( m * gsl_sf_gamma_inc(0, omega / omega_0) - omega_0 * std::exp(-omega / omega_0) )
-                        - NPrime * omega / (2 * omega_0 * omega_0) * std::exp(- omega / omega_0) * (omega + omega_0 - m);
-//                limitWW = 1.0 * omega / std::pow(omega_0, 2) * 
-//                    (
-//                     m * gsl_sf_gamma_inc(0.0, omega / omega_0)
-//                     - omega_0 * std::exp(- omega / omega_0)
-//                    );
-            } else {
-                limitWW = -omega / omega_0 * std::exp(-omega / omega_0);
-            }
+            const double limitWW = -omega / omega_0 * std::exp(-omega / omega_0);
             const double nonWW   = (lambda_E2 - lambda_H2) / (18.0 * pow(omega_0, 4))
                 * (2.0 * omega_0 - omega) * omega * std::exp(-omega / omega_0);
 
@@ -707,6 +668,498 @@ namespace eos
 
     double
     BMesonLCDAs::Ybar_A(const double & omega, const double & xi) const
+    {
+        return _imp->Ybar_A(omega, xi);
+    }
+
+    // B_c-meson LCDA
+    template <>
+    struct Implementation<BcMesonLCDAs>
+    {
+        SwitchOption opt_q;
+
+        UsedParameter N0;
+        UsedParameter omega_0;
+        UsedParameter lambda_E2;
+        UsedParameter lambda_H2;
+
+        SwitchOption opt_gminus;
+        double switch_gminus;
+
+        inline
+        QualifiedName parameter(const char * _name) const
+        {
+            return QualifiedName(qnp::Prefix("B_c"), qnp::Name(_name));
+        }
+
+        Implementation(const Parameters & p, const Options & o, ParameterUser & u) :
+            opt_q(o, "q", { "u", "d", "s", "c" }, "u"),
+            N0(p[parameter("N0").str()], u),
+            omega_0(p[parameter("omega_0").str()], u),
+            lambda_E2(p[parameter("lambda_E^2").str()], u),
+            lambda_H2(p[parameter("lambda_H^2").str()], u),
+            opt_gminus(o, "gminus", { "zero", "WW-limit" }, "WW-limit"),
+            switch_gminus(1.0)
+        {
+            if (opt_gminus.value() == "zero")
+            {
+                switch_gminus = 0.0;
+            }
+        }
+
+        /* Normalisation parameter */
+        inline double N1() const
+        {
+            return 1.0 - N0;
+        }
+
+        /* Leading twist two-particle LCDAs */
+
+        inline double phi_plus(const double & omega) const
+        {
+            const double omega_0 = this->omega_0();
+            const double N0 = this->N0();
+            const double N1 = this->N1();
+
+            return (
+                  omega / std::pow(omega_0, 2)
+                * (N0 + N1 * omega / 2.0 / omega_0)
+                * std::exp(- omega / omega_0)
+            );
+        }
+
+        inline double phi_minus(const double & omega) const
+        {
+            const double omega_0 = this->omega_0();
+            const double N0 = this->N0();
+            const double N1 = this->N1();
+            const double m = 1.3;
+
+            return (
+                  std::exp(- omega / omega_0) / omega_0
+                  * (
+                      N0 * (m / omega_0 + 1)
+                      + 0.5 * N1 * (omega / omega_0 + 1) * (
+                            ( m * (omega - omega_0) ) / ( omega_0 * (omega + omega_0) ) + 1
+                        )
+                    )
+                  - N0 * m / std::pow(omega_0, 2) * gsl_sf_gamma_inc(0, omega / omega_0)
+                );
+        }
+
+        inline double phi_bar(const double & omega) const
+        {
+            const double omega_0 = this->omega_0();
+            const double N0 = this->N0();
+            const double N1 = this->N1();
+            const double m = 1.3;
+
+            return (
+                    N0 * omega / std::pow(omega_0, 2) * (
+                        + m * gsl_sf_gamma_inc(0, omega / omega_0)
+                        - omega_0 * std::exp(- omega / omega_0)
+                    )
+                    - N1 * omega / (2 * std::pow(omega_0, 2)) * (
+                        std::exp(- omega / omega_0) * (omega + omega_0 - m)
+                    )
+                );
+        }
+
+        inline double phi_bar_d1(const double & omega) const
+        {
+            const double omega_0 = this->omega_0();
+            const double N0 = this->N0();
+            const double N1 = this->N1();
+            const double m = 1.3;
+
+            return (
+                    N0 / omega_0 * (
+                        std::exp(- omega / omega_0) * ( (omega - m) / omega_0 - 1 )
+                        + m / omega_0 * gsl_sf_gamma_inc(0, omega / omega_0)
+                        )
+                    + N1 / 2.0 / omega_0 * std::exp(- omega / omega_0) * (
+                        m / omega_0 * (1 - omega / omega_0)
+                        - omega / omega_0 * (1 - omega / omega_0)
+                        - 1
+                        )
+                  );
+        }
+
+        /* Next-to-leading twist two-particle LCDAs */
+
+        // TODO
+        inline double g_minusWW(const double & omega) const {
+            return 0;
+        }
+
+        // TODO
+       inline double g_minusWW_d1(const double & omega) const
+        {
+            return 0;
+        }
+
+       // TODO
+       inline double g_minusWW_d2(const double & omega) const
+        {
+            return 0;
+        }
+
+       // TODO
+        inline double g_plus(const double & omega) const
+        {
+            return 0;
+        }
+
+        // TODO
+        inline double g_plus_d1(const double & omega) const
+        {
+            return 0;
+        }
+
+        // TODO
+        inline double g_plus_d2(const double & omega) const
+        {
+            return 0;
+        }
+
+        // TODO
+        inline double g_bar(const double & omega) const
+        {
+            return 0;
+        }
+
+        // TODO
+        inline double g_bar_d1(const double & omega) const
+        {
+            return 0;
+        }
+
+        // TODO
+        inline double g_bar_d2(const double & omega) const
+        {
+            return 0;
+        }
+
+        // TODO
+        inline double g_bar_d3(const double & omega) const
+        {
+            return 0;
+        }
+
+        /* Leading twist three-particle LCDAs */
+
+        // TODO
+        inline double phi_3(const double & omega_1, const double & omega_2) const
+        {
+            return 0;
+        }
+
+        // TODO
+        inline double phi_4(const double & omega_1, const double & omega_2) const
+        {
+            return 0;
+        }
+
+        // TODO
+        inline double phi_bar_3(const double & omega_1, const double & omega_2) const
+        {
+            return 0;
+        }
+
+        // TODO
+        inline double phi_bar_4(const double & omega_1, const double & omega_2) const
+        {
+            return 0;
+        }
+
+        // TODO
+        inline double phi_bar2_3(const double & omega_1, const double & omega_2) const
+        {
+            return 0;
+        }
+
+        // TODO
+        inline double phi_bar2_4(const double & omega_1, const double & omega_2) const
+        {
+            return 0;
+        }
+
+        // TODO
+        inline double phi_bar_bar_3(const double & omega_1, const double & omega_2) const
+        {
+            return 0;
+        }
+
+        // TODO
+        inline double phi_bar_bar_4(const double & omega_1, const double & omega_2) const
+        {
+            return 0;
+        }
+
+        // TODO
+        inline double psi_bar_4(const double & omega_1, const double & omega_2) const
+        {
+            return 0;
+        }
+
+        // TODO
+        inline double psi_bar_bar_4(const double & omega_1, const double & omega_2) const
+        {
+            return 0;
+        }
+
+
+        // TODO
+        inline double chi_bar_4(const double & omega_1, const double & omega_2) const
+        {
+            return 0;
+        }
+
+        // TODO
+        inline double chi_bar_bar_4(const double & omega_1, const double & omega_2) const
+        {
+            return 0;
+        }
+
+        // TODO
+        inline double psi_A(const double & omega, const double & xi) const
+        {
+            return 0;
+        }
+
+        // TODO
+        inline double psi_V(const double & omega, const double & xi) const
+        {
+            return 0;
+        }
+
+        // TODO
+        inline double X_A(const double & omega, const double & xi) const
+        {
+            return 0;
+        }
+
+        // TODO
+        inline double Y_A(const double & omega, const double & xi) const
+        {
+            return 0;
+        }
+
+        // TODO
+        inline double Xbar_A(const double & omega, const double & xi) const
+        {
+            return 0;
+        }
+
+        // TODO
+        inline double Ybar_A(const double & omega, const double & xi) const
+        {
+            return 0;
+        }
+    };
+
+    // TODO
+    double
+    BcMesonLCDAs::inverse_lambda_plus() const
+    {
+        return 0.0;
+    }
+
+    BcMesonLCDAs::BcMesonLCDAs(const Parameters & p, const Options & o) :
+        PrivateImplementationPattern<BcMesonLCDAs>(new Implementation<BcMesonLCDAs>(p, o, *this))
+    {
+    }
+
+    BcMesonLCDAs::~BcMesonLCDAs() = default;
+
+    double
+    BcMesonLCDAs::phi_plus(const double & omega) const
+    {
+        return _imp->phi_plus(omega);
+    }
+
+    double
+    BcMesonLCDAs::phi_minus(const double & omega) const
+    {
+        return _imp->phi_minus(omega);
+    }
+
+    double
+    BcMesonLCDAs::phi_bar(const double & omega) const
+    {
+        return _imp->phi_bar(omega);
+    }
+
+    double
+    BcMesonLCDAs::phi_bar_d1(const double & omega) const
+    {
+        return _imp->phi_bar_d1(omega);
+    }
+
+    double
+    BcMesonLCDAs::g_plus(const double & omega) const
+    {
+        return _imp->g_plus(omega);
+    }
+
+    double
+    BcMesonLCDAs::g_plus_d1(const double & omega) const
+    {
+        return _imp->g_plus_d1(omega);
+    }
+
+    double
+    BcMesonLCDAs::g_plus_d2(const double & omega) const
+    {
+        return _imp->g_plus_d2(omega);
+    }
+
+    double
+    BcMesonLCDAs::g_minusWW(const double & omega) const
+    {
+        return _imp->g_minusWW(omega);
+    }
+
+    double
+    BcMesonLCDAs::g_minusWW_d1(const double & omega) const
+    {
+        return _imp->g_minusWW_d1(omega);
+    }
+
+    double
+    BcMesonLCDAs::g_minusWW_d2(const double & omega) const
+    {
+        return _imp->g_minusWW_d2(omega);
+    }
+
+    double
+    BcMesonLCDAs::g_bar(const double & omega) const
+    {
+        return _imp->g_bar(omega);
+    }
+
+    double
+    BcMesonLCDAs::g_bar_d1(const double & omega) const
+    {
+        return _imp->g_bar_d1(omega);
+    }
+
+    double
+    BcMesonLCDAs::g_bar_d2(const double & omega) const
+    {
+        return _imp->g_bar_d2(omega);
+    }
+
+    double
+    BcMesonLCDAs::g_bar_d3(const double & omega) const
+    {
+        return _imp->g_bar_d3(omega);
+    }
+
+    double
+    BcMesonLCDAs::phi_3(const double & omega_1, const double & omega_2) const
+    {
+        return _imp->phi_3(omega_1, omega_2);
+    }
+
+    double
+    BcMesonLCDAs::phi_4(const double & omega_1, const double & omega_2) const
+    {
+        return _imp->phi_4(omega_1, omega_2);
+    }
+
+    double
+    BcMesonLCDAs::phi_bar_3(const double & omega_1, const double & omega_2) const
+    {
+        return _imp->phi_bar_3(omega_1, omega_2);
+    }
+
+    double
+    BcMesonLCDAs::phi_bar_4(const double & omega_1, const double & omega_2) const
+    {
+        return _imp->phi_bar_4(omega_1, omega_2);
+    }
+
+    double
+    BcMesonLCDAs::phi_bar2_3(const double & omega_1, const double & omega_2) const
+    {
+        return _imp->phi_bar2_3(omega_1, omega_2);
+    }
+
+    double
+    BcMesonLCDAs::phi_bar2_4(const double & omega_1, const double & omega_2) const
+    {
+        return _imp->phi_bar2_4(omega_1, omega_2);
+    }
+
+    double
+    BcMesonLCDAs::phi_bar_bar_3(const double & omega_1, const double & omega_2) const
+    {
+        return _imp->phi_bar_bar_3(omega_1, omega_2);
+    }
+
+    double
+    BcMesonLCDAs::phi_bar_bar_4(const double & omega_1, const double & omega_2) const
+    {
+        return _imp->phi_bar_bar_4(omega_1, omega_2);
+    }
+
+    double
+    BcMesonLCDAs::psi_bar_4(const double & omega_1, const double & omega_2) const
+    {
+        return _imp->psi_bar_4(omega_1, omega_2);
+    }
+
+    double
+    BcMesonLCDAs::psi_bar_bar_4(const double & omega_1, const double & omega_2) const
+    {
+        return _imp->psi_bar_bar_4(omega_1, omega_2);
+    }
+
+    double
+    BcMesonLCDAs::chi_bar_4(const double & omega_1, const double & omega_2) const
+    {
+        return _imp->chi_bar_4(omega_1, omega_2);
+    }
+
+    double
+    BcMesonLCDAs::chi_bar_bar_4(const double & omega_1, const double & omega_2) const
+    {
+        return _imp->chi_bar_bar_4(omega_1, omega_2);
+    }
+
+    double
+    BcMesonLCDAs::psi_A(const double & omega, const double & xi) const
+    {
+        return _imp->psi_A(omega, xi);
+    }
+
+    double
+    BcMesonLCDAs::psi_V(const double & omega, const double & xi) const
+    {
+        return _imp->psi_V(omega, xi);
+    }
+
+    double
+    BcMesonLCDAs::X_A(const double & omega, const double & xi) const
+    {
+        return _imp->X_A(omega, xi);
+    }
+
+    double
+    BcMesonLCDAs::Y_A(const double & omega, const double & xi) const
+    {
+        return _imp->Y_A(omega, xi);
+    }
+
+    double
+    BcMesonLCDAs::Xbar_A(const double & omega, const double & xi) const
+    {
+        return _imp->Xbar_A(omega, xi);
+    }
+
+    double
+    BcMesonLCDAs::Ybar_A(const double & omega, const double & xi) const
     {
         return _imp->Ybar_A(omega, xi);
     }

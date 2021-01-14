@@ -628,6 +628,16 @@ groups:
           min:     +0.03
           max:     +0.09
           comments: 'GeV^2, cf. [?]'
+      'B_c::N0' :
+          central: +1.65
+          min:     +0.05
+          max:     +0.05
+          comments: '1, cf. [?]'
+      'B_c::omega_0' :
+          central: +1.75
+          min:     +0.2
+          max:     +0.2
+          comments: '1, cf. [?]'
   # }}}
 
   # Parameters in the Heavy Quark Expansion

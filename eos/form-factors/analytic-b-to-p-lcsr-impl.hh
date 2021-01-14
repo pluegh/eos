@@ -105,15 +105,29 @@ namespace eos
             opt_method(o, "method", { "borel", "dispersive" }, "borel"),
             switch_borel(opt_method.value() == "borel")
         {
-            // TODO switch on quark flavor here
-            b_lcdas_ptr = std::make_shared<BMesonLCDAs>(
-                    BMesonLCDAs(p, o + Options{ { "q", stringify(Process_::q_s) } })
-                    );
+            // Instantiate the B LCDA
+            switch (Process_::q_s)
+            {
+                case 'u':
+                case 'd':
+                case 's':
+                    b_lcdas_ptr = std::make_shared<BMesonLCDAs>(
+                            BMesonLCDAs(p, o + Options{ { "q", stringify(Process_::q_s) } })
+                            );
+                    break;
 
+                case 'c':
+                    b_lcdas_ptr = std::make_shared<BcMesonLCDAs>(
+                            BcMesonLCDAs(p, o + Options{ { "q", stringify(Process_::q_s) } })
+                            );
+                    break;
+
+                default:
+                    throw InternalError("Unknown spectator quark flavour: '" + stringify(Process_::q_s) + "'");
+            }
             u.uses(*b_lcdas_ptr);
 
-            // TODO need a similar switch for the spectator quark flavour --
-            // option 'q'
+
             switch (Process_::q_v)
             {
                 case 'u':
