@@ -2421,7 +2421,7 @@ namespace eos
         }
 
         /*
-         * Integrands for the first moments. Only the borel method is implemented
+         * Integrands for the first moments. Only the Borel method is implemented
          */
 
         double integrand_fp_2pt_borel_m1(const double & sigma, const double & q2) const
