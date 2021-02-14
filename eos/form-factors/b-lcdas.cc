@@ -28,6 +28,8 @@
 
 #include <gsl/gsl_sf_expint.h>
 #include <gsl/gsl_sf_gamma.h>
+#include <functional>
+
 
 namespace eos
 {
@@ -41,8 +43,17 @@ namespace eos
         UsedParameter lambda_H2;
 
         SwitchOption opt_gminus;
+        SwitchOption opt_contributions;
 
         double switch_gminus;
+
+        // smaller debug level = less contributing functions
+        // 0.0 => nada
+        // from 1.0 => only phi+
+        // from 2.0 => phi+, phi-, phiBar
+        // from 3.0 => also g+, g-, gBar
+        // from 4.0   => everything
+        float debug_level_B;
 
         inline
         QualifiedName parameter(const char * _name) const
@@ -78,11 +89,25 @@ namespace eos
             lambda_E2(p[parameter("lambda_E^2").str()], u),
             lambda_H2(p[parameter("lambda_H^2").str()], u),
             opt_gminus(o, "gminus", { "zero", "WW-limit" }, "WW-limit"),
+            opt_contributions(o, "contributions", {"all", "phi", "all_phi", "all_phi_g"}, "all"),
             switch_gminus(1.0)
         {
             if (opt_gminus.value() == "zero")
             {
                 switch_gminus = 0.0;
+            }
+
+            if (opt_contributions.value() == "all") {
+                debug_level_B = 99.0;
+            }
+            else if (opt_contributions.value() == "phi") {
+                debug_level_B = 1.0;
+            }
+            else if (opt_contributions.value() == "all_phi") {
+                debug_level_B = 2.0;
+            }
+            else if (opt_contributions.value() == "all_phi_g") {
+                debug_level_B = 3.0;
             }
         }
 
@@ -96,18 +121,17 @@ namespace eos
 
         inline double phi_plus(const double & omega) const
         {
+            if (debug_level_B < 1.0) return 0;
+
             // cf. [KMO2006], eq. (53), p. 16
             const double omega_0 = lambda_B();
 
             return omega / (omega_0 * omega_0) * std::exp(-omega / omega_0);
         }
 
-        // <= 1.0: only phi_+
-        const float debug_level_B = 1.0;
-
         inline double phi_minus(const double & omega) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 2.0) return 0;
 
             // cf. [KMO2006], eq. (53), p. 16
             const double omega_0 = lambda_B();
@@ -123,7 +147,7 @@ namespace eos
 
         inline double phi_bar(const double & omega) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 2.0) return 0;
 
             const double omega_0 = lambda_B();
 
@@ -136,7 +160,7 @@ namespace eos
 
         inline double phi_bar_d1(const double & omega) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 2.0) return 0;
 
             return phi_plus(omega) - phi_minus(omega);
         }
@@ -145,7 +169,7 @@ namespace eos
 
         inline double g_minusWW(const double & omega) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 3.0) return 0;
 
             if (omega < 1.0e-5)
                 return 0.0;
@@ -160,7 +184,7 @@ namespace eos
 
        inline double g_minusWW_d1(const double & omega) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 3.0) return 0;
 
             // Wandzura-Wilcek limit of g_minus
 
@@ -172,7 +196,7 @@ namespace eos
 
        inline double g_minusWW_d2(const double & omega) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 3.0) return 0;
 
             // Wandzura-Wilcek limit of g_minus
 
@@ -184,7 +208,7 @@ namespace eos
 
         inline double g_plus(const double & omega) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 3.0) return 0;
 
             if (omega < 1.0e-5)
                 return 0.0;
@@ -211,7 +235,7 @@ namespace eos
 
         inline double g_plus_d1(const double & omega) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 3.0) return 0;
 
             if (omega < 1.0e-5)
                 return 0.0;
@@ -238,7 +262,7 @@ namespace eos
 
         inline double g_plus_d2(const double & omega) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 3.0) return 0;
 
             // Euler-Mascheroni gamma constant
             constexpr static double gamma_E = 0.57721566490153286;
@@ -260,7 +284,7 @@ namespace eos
 
         inline double g_bar(const double & omega) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 3.0) return 0;
 
             if (omega < 1.0e-5)
                 return 0.0;
@@ -289,7 +313,7 @@ namespace eos
 
         inline double g_bar_d1(const double & omega) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 3.0) return 0;
 
             // including the WW-limit of g_minus
             // in this case: g_bar = \int_0^omega d(eta) (g_plus(eta) - g_minusWW(eta))
@@ -298,7 +322,7 @@ namespace eos
 
         inline double g_bar_d2(const double & omega) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 3.0) return 0;
 
             // including the WW-limit of g_minus
             // in this case: g_bar = \int_0^omega d(eta) (g_plus(eta) - g_minusWW(eta))
@@ -307,7 +331,7 @@ namespace eos
 
         inline double g_bar_d3(const double & omega) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 3.0) return 0;
 
             // including the WW-limit of g_minus
             // in this case: g_bar = \int_0^omega d(eta) (g_plus(eta) - g_minusWW(eta))
@@ -318,7 +342,7 @@ namespace eos
 
         inline double phi_3(const double & omega_1, const double & omega_2) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 4.0) return 0;
 
             const double omega_0 = lambda_B();
 
@@ -328,7 +352,7 @@ namespace eos
 
         inline double phi_4(const double & omega_1, const double & omega_2) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 4.0) return 0;
 
             const double omega_0 = lambda_B();
 
@@ -338,7 +362,7 @@ namespace eos
 
         inline double phi_bar_3(const double & omega_1, const double & omega_2) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 4.0) return 0;
 
             const double omega_0 = lambda_B();
 
@@ -350,7 +374,7 @@ namespace eos
 
         inline double phi_bar_4(const double & omega_1, const double & omega_2) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 4.0) return 0;
 
             const double omega_0 = lambda_B();
 
@@ -362,7 +386,7 @@ namespace eos
 
         inline double phi_bar2_3(const double & omega_1, const double & omega_2) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 4.0) return 0;
 
             const double omega_0 = lambda_B();
 
@@ -374,7 +398,7 @@ namespace eos
 
         inline double phi_bar2_4(const double & omega_1, const double & omega_2) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 4.0) return 0;
 
             const double omega_0 = lambda_B();
 
@@ -386,7 +410,7 @@ namespace eos
 
         inline double phi_bar_bar_3(const double & omega_1, const double & omega_2) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 4.0) return 0;
 
             const double omega_0 = lambda_B();
 
@@ -400,7 +424,7 @@ namespace eos
 
         inline double phi_bar_bar_4(const double & omega_1, const double & omega_2) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 4.0) return 0;
 
             const double omega_0 = lambda_B();
 
@@ -414,7 +438,7 @@ namespace eos
 
         inline double psi_bar_4(const double & omega_1, const double & omega_2) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 4.0) return 0;
 
             const double omega_0 = lambda_B();
 
@@ -426,7 +450,7 @@ namespace eos
 
         inline double psi_bar_bar_4(const double & omega_1, const double & omega_2) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 4.0) return 0;
 
             const double omega_0 = lambda_B();
 
@@ -441,7 +465,7 @@ namespace eos
 
         inline double chi_bar_4(const double & omega_1, const double & omega_2) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 4.0) return 0;
 
             const double omega_0 = lambda_B();
 
@@ -453,7 +477,7 @@ namespace eos
 
         inline double chi_bar_bar_4(const double & omega_1, const double & omega_2) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 4.0) return 0;
 
             const double omega_0 = lambda_B();
 
@@ -467,7 +491,7 @@ namespace eos
 
         inline double psi_A(const double & omega, const double & xi) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 4.0) return 0;
 
             // cf. [KMO2006], eq. (53), p. 16
             const double omega_0 = lambda_B(), omega_0_2 = omega_0 * omega_0, omega_0_4 = omega_0_2 * omega_0_2;
@@ -478,14 +502,14 @@ namespace eos
 
         inline double psi_V(const double & omega, const double & xi) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 4.0) return 0;
 
             return psi_A(omega, xi);
         }
 
         inline double X_A(const double & omega, const double & xi) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 4.0) return 0;
 
             // cf. [KMO2006], eq. (53), p. 16
             const double omega_0 = lambda_B(), omega_0_2 = omega_0 * omega_0, omega_0_4 = omega_0_2 * omega_0_2;
@@ -496,7 +520,7 @@ namespace eos
 
         inline double Y_A(const double & omega, const double & xi) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 4.0) return 0;
 
             // cf. [KMO2006], eq. (53), p. 16
             const double omega_0 = lambda_B(), omega_0_2 = omega_0 * omega_0, omega_0_4 = omega_0_2 * omega_0_2;
@@ -507,7 +531,7 @@ namespace eos
 
         inline double Xbar_A(const double & omega, const double & xi) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 4.0) return 0;
 
             // cf. [KMO2006], eq. (53), p. 16
             const double omega_0 = lambda_B(), omega_0_2 = omega_0 * omega_0, omega_0_3 = omega_0_2 * omega_0;
@@ -520,7 +544,7 @@ namespace eos
 
         inline double Ybar_A(const double & omega, const double & xi) const
         {
-            if (debug_level_B <= 1.0) return 0;
+            if (debug_level_B < 4.0) return 0;
 
             // cf. [KMO2006], eq. (53), p. 16
             const double omega_0 = lambda_B(), omega_0_2 = omega_0 * omega_0, omega_0_3 = omega_0_2 * omega_0;
@@ -743,12 +767,13 @@ namespace eos
     {
         SwitchOption opt_q;
 
-        UsedParameter N0;
-        UsedParameter omega_0;
+        UsedParameter delta_N;
+        UsedParameter omega_1_plus;
         UsedParameter lambda_E2;
         UsedParameter lambda_H2;
 
         SwitchOption opt_gminus;
+        SwitchOption opt_solution;
         double switch_gminus;
 
         inline
@@ -759,23 +784,43 @@ namespace eos
 
         Implementation(const Parameters & p, const Options & o, ParameterUser & u) :
             opt_q(o, "q", { "u", "d", "s", "c" }, "u"),
-            N0(p[parameter("N0").str()], u),
-            omega_0(p[parameter("omega_0").str()], u),
+            delta_N(p[parameter("delta_N").str()], u),
+            omega_1_plus(p[parameter("omega_1_plus").str()], u),
             lambda_E2(p[parameter("lambda_E^2").str()], u),
             lambda_H2(p[parameter("lambda_H^2").str()], u),
             opt_gminus(o, "gminus", { "zero", "WW-limit" }, "WW-limit"),
+            opt_solution(o, "solution", { "+", "-" }, "+"),
             switch_gminus(1.0)
         {
             if (opt_gminus.value() == "zero")
             {
                 switch_gminus = 0.0;
             }
+
+            if (opt_solution.value() == "+") {
+                N0 = [&]() { return 1.0 + 2.0 * delta_N / (1.0 + delta_N); };
+                omega_0 = [&]() { return omega_1_plus / 2.0 * (1.0 + delta_N); };
+            }
+            else if (opt_solution.value() == "-") {
+                N0 = [&]() { return 1.0 - 2.0 * delta_N / (1.0 + delta_N); };
+                omega_0 = [&]() { return omega_1_plus / 2.0 * (1.0 - delta_N); };
+            }
         }
 
-        /* Normalisation parameter */
+        // Assign according to the negative or positive solution 
+        // at runtime to perform the string comparison only once
+        // at instantiation
+        std::function<double(void)> N0;
+        std::function<double(void)> omega_0;
+
         inline double N1() const
         {
-            return 1.0 - N0;
+            return 1.0 - N0();
+        }
+
+        inline double mCharm(void) const
+        {
+            return 1.3; // renormalised at mu = 2 GeV in MSBar
         }
 
         /* Leading twist two-particle LCDAs */
@@ -798,18 +843,18 @@ namespace eos
             const double omega_0 = this->omega_0();
             const double N0 = this->N0();
             const double N1 = this->N1();
-            const double m = 1.3;
+            const double m = this->mCharm();
 
             return (
                   std::exp(- omega / omega_0) / omega_0
                   * (
-                      N0 * (m / omega_0 + 1)
-                      + 0.5 * N1 * (omega / omega_0 + 1) *
+                      N0 * (m / omega_0 + 1.0)
+                      + 0.5 * N1 * (omega / omega_0 + 1.0) *
                         (
-                            ( m * (omega - omega_0) ) / ( omega_0 * (omega + omega_0) ) + 1
+                            ( m * (omega - omega_0) ) / ( omega_0 * (omega + omega_0) ) + 1.0
                         )
                     )
-                  - N0 * m / std::pow(omega_0, 2) * gsl_sf_gamma_inc(0, omega / omega_0)
+                  - N0 * m / std::pow(omega_0, 2.0) * gsl_sf_gamma_inc(0, omega / omega_0)
                 );
         }
 
@@ -818,14 +863,14 @@ namespace eos
             const double omega_0 = this->omega_0();
             const double N0 = this->N0();
             const double N1 = this->N1();
-            const double m = 1.3;
+            const double m = this->mCharm();
 
             return (
-                    N0 * omega / std::pow(omega_0, 2) * (
+                    N0 * omega / std::pow(omega_0, 2.0) * (
                         + m * gsl_sf_gamma_inc(0, omega / omega_0)
                         - omega_0 * std::exp(- omega / omega_0)
                     )
-                    - N1 * omega / (2 * std::pow(omega_0, 2)) * (
+                    - N1 * omega / (2.0 * std::pow(omega_0, 2.0)) * (
                         std::exp(- omega / omega_0) * (omega + omega_0 - m)
                     )
                 );
@@ -836,17 +881,17 @@ namespace eos
             const double omega_0 = this->omega_0();
             const double N0 = this->N0();
             const double N1 = this->N1();
-            const double m = 1.3;
+            const double m = this->mCharm();
 
             return (
                     N0 / omega_0 * (
-                        std::exp(- omega / omega_0) * ( (omega - m) / omega_0 - 1 )
+                        std::exp(- omega / omega_0) * ( (omega - m) / omega_0 - 1.0 )
                         + m / omega_0 * gsl_sf_gamma_inc(0, omega / omega_0)
                         )
                     + N1 / 2.0 / omega_0 * std::exp(- omega / omega_0) * (
-                        m / omega_0 * (1 - omega / omega_0)
-                        - omega / omega_0 * (1 - omega / omega_0)
-                        - 1
+                        m / omega_0 * (1.0 - omega / omega_0)
+                        - omega / omega_0 * (1.0 - omega / omega_0)
+                        - 1.0
                         )
                   );
         }
@@ -854,26 +899,66 @@ namespace eos
         /* Next-to-leading twist two-particle LCDAs */
 
         // TODO
-        inline double g_minusWW(const double & omega) const {
+        inline double g_minusWW(const double & omega) const
+        {
+            const double omega_0 = this->omega_0();
+            const double N0 = this->N0();
+            const double N1 = this->N1();
+            const double d = this->delta_N();
+            const double m = this->mCharm();
+
+            return + 3.0 * N0 / (4.0* omega_0) * std::exp(- omega / omega_0) * (
+                       omega * omega_0 + std::pow(omega_0, 2.0) * d / (1.0+d) + m * omega / 6.0
+                       )
+                   + 3.0 * N0 * m * omega / (8.0 * std::pow(omega_0, 2.0)) * (
+                       omega - omega_0 * 2.0 / (1.0+d) - m/3.0
+                       ) *
+                       gsl_sf_gamma_inc(0, omega / omega_0)
+                   + 3.0 * N1 / (8.0 * std::pow(omega_0, 2.0)) * std::exp(- omega / omega_0) * (
+                       + std::pow(omega, 2.0) * omega_0
+                       + omega * std::pow(omega_0, 2.0) * (2.0 + 3.0*d)/(1.0 + d) 
+                       + std::pow(omega_0, 3.0) * (1.0 + 3.0*d)/(1.0 + d)
+                       + m * omega / 3.0 * (
+                           + 2.0 * omega
+                           - omega_0 / 2.0 * (5.0-d)/(1.0+d) - m/2.0
+                           )
+                       )
+                   ;
+        }
+
+        // TODO
+        inline double g_minusWW_d1(const double & omega) const
+        {
             return 0;
         }
 
         // TODO
-       inline double g_minusWW_d1(const double & omega) const
+        inline double g_minusWW_d2(const double & omega) const
         {
             return 0;
         }
 
-       // TODO
-       inline double g_minusWW_d2(const double & omega) const
-        {
-            return 0;
-        }
-
-       // TODO
+        // TODO
         inline double g_plus(const double & omega) const
         {
-            return 0;
+            const double omega_0 = this->omega_0();
+            const double N0 = this->N0();
+            const double N1 = this->N1();
+            const double d = this->delta_N();
+            const double m = this->mCharm();
+
+            return + N0 / (4.0 * omega_0) * std::exp(- omega / omega_0) * (
+                     + 2.0 * std::pow(omega, 2.0) + 3.0 * omega_0 * (omega + omega_0) * d / (1.0 + d)
+                     )
+                   - N0 * m * std::pow(omega, 2.0) / (8.0 * std::pow(omega_0, 2.0)) * (
+                     + gsl_sf_gamma_inc(0, omega / omega_0) 
+                     )
+                   + N1 / (8.0 * std::pow(omega_0, 2.0)) * std::exp(- omega / omega_0) * (
+                     + 2.0 * std::pow(omega, 3.0)
+                     + std::pow(omega, 2.0) * omega_0 * (2.0 + 5.0*d)/(1.0 + d)
+                     + 3.0 * std::pow(omega_0, 2.0) * (omega + omega_0) * (1.0 + 3.0*d)/(1.0 + d) - (m * std::pow(omega, 2.0) )/2.0
+                     )
+                   ;
         }
 
         // TODO
@@ -888,10 +973,31 @@ namespace eos
             return 0;
         }
 
-        // TODO
         inline double g_bar(const double & omega) const
         {
-            return 0;
+            auto Power = [](const double & b, const double & e) { return std::pow(b, e); };
+            auto Exp = [](const double & e) { return std::exp(e); };
+            auto ExpIntegralEi = [](const double & arg) { return gsl_sf_expint_Ei(arg); };
+            double const E = std::exp(1);
+            const double omega0 = this->omega_0();
+            const double N0 = this->N0();
+            const double N1 = this->N1();
+            const double del = this->delta_N();
+            const double m = this->mCharm();
+
+            return (
+                    (omega0*(-12*(1 + del)*N1*Power(omega,3) - 6*(4*(1 + del)*N0 + (5 + 8*del)*N1)*Power(omega,2)*omega0 - 
+                             6*((2 + 8*del)*N0 + (7 + 16*del)*N1)*omega*Power(omega0,2) - 
+                             6*((2 + 8*del)*N0 + (7 + 16*del)*N1)*Power(omega0,3) + 
+                             6*Power(E,omega/omega0)*((2 + 8*del)*N0 + (7 + 16*del)*N1)*Power(omega0,3) - 
+                             3*(1 + del)*Power(m,2)*(N0 + N1)*(omega + omega0 - Power(E,omega/omega0)*omega0) + 
+                             m*(2*N0*(4*(1 + del)*Power(omega,2) + (2 + 11*del)*omega*omega0 - 
+                                     (2 + 11*del)*(-1 + Power(E,omega/omega0))*Power(omega0,2)) + 
+                                 3*N1*(5*(1 + del)*Power(omega,2) + (5 + 11*del)*omega*omega0 - 
+                                     (5 + 11*del)*(-1 + Power(E,omega/omega0))*Power(omega0,2)))) + 
+                     Power(E,omega/omega0)*m*N0*Power(omega,2)*(-3*(1 + del)*m + 8*(1 + del)*omega - 18*omega0)*
+                     ExpIntegralEi(-(omega/omega0)))/(48.*(1 + del)*Power(E,omega/omega0)*Power(omega0,2)) 
+                   );
         }
 
         // TODO
