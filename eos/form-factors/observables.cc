@@ -1095,6 +1095,103 @@ namespace eos
 
     // }}}
 
+    // TODO: confirm!
+    // B_c -> V(ector)
+    // {{{
+
+    // B_c -> D^*
+    // {{{
+    ObservableGroup
+    make_bc_to_dstar_form_factors_group()
+    {
+        auto imp = new Implementation<ObservableGroup>(
+            R"(Form factors for $B_c\to \bar{D}^*$ transitions)",
+            R"(Pseudo observables representing the full basis of $B_s\to \bar{D}_s^*$ form factors. )"
+            R"(The specific parametrization can be chosen via the "form-factors" option.)",
+            {
+                make_form_factor_adapter("B_c->D^*::V(q2)",
+                        &FormFactors<PToV>::v, std::make_tuple("q2")),
+
+                make_form_factor_adapter("B_c->D^*::A_0(q2)",
+                        &FormFactors<PToV>::a_0, std::make_tuple("q2")),
+
+                make_form_factor_adapter("B_c->D^*::A_1(q2)",
+                        &FormFactors<PToV>::a_1, std::make_tuple("q2")),
+
+                make_form_factor_adapter("B_c->D^*::A_2(q2)",
+                        &FormFactors<PToV>::a_2, std::make_tuple("q2")),
+
+                make_form_factor_adapter("B_c->D^*::A_12(q2)",
+                        &FormFactors<PToV>::a_12, std::make_tuple("q2")),
+
+                make_form_factor_adapter("B_c->D^*::T_1(q2)",
+                        &FormFactors<PToV>::t_1, std::make_tuple("q2")),
+
+                make_form_factor_adapter("B_c->D^*::T_2(q2)",
+                        &FormFactors<PToV>::t_2, std::make_tuple("q2")),
+
+                make_form_factor_adapter("B_c->D^*::T_3(q2)",
+                        &FormFactors<PToV>::t_3, std::make_tuple("q2")),
+
+                make_form_factor_adapter("B_c->D^*::T_23(q2)",
+                        &FormFactors<PToV>::t_23, std::make_tuple("q2")),
+
+                make_form_factor_adapter("B_c->D^*::V(q2)/A_1(q2)",
+                        "B_c->D^*", &FormFactors<PToV>::v,
+                        "B_c->D^*", &FormFactors<PToV>::a_1,
+                        std::make_tuple("q2")),
+
+                make_form_factor_adapter("B_c->D^*::A_2(q2)/A_1(q2)",
+                        "B_c->D^*", &FormFactors<PToV>::a_2,
+                        "B_c->D^*", &FormFactors<PToV>::a_1,
+                        std::make_tuple("q2")),
+
+                make_form_factor_adapter("B_c->D^*::A_12(q2)/A_1(q2)",
+                        "B_c->D^*", &FormFactors<PToV>::a_12,
+                        "B_c->D^*", &FormFactors<PToV>::a_1,
+                        std::make_tuple("q2")),
+
+                make_form_factor_adapter("B_c->D^*::T_23(q2)/T_2(q2)",
+                        "B_c->D^*", &FormFactors<PToV>::t_23,
+                        "B_c->D^*", &FormFactors<PToV>::t_2,
+                        std::make_tuple("q2")),
+
+                make_observable("B_c->D^*::A_1[s^1/s^0](q2)",
+                        &AnalyticFormFactorBToVLCSR<lcsr::BsToDsstar>::normalized_moment_1_a_1,
+                        std::make_tuple("q2")),
+
+                make_observable("B_c->D^*::A_2[s^1/s^0](q2)",
+                        &AnalyticFormFactorBToVLCSR<lcsr::BsToDsstar>::normalized_moment_1_a_2,
+                        std::make_tuple("q2")),
+
+                make_observable("B_c->D^*::A_30[s^1/s^0](q2)",
+                         &AnalyticFormFactorBToVLCSR<lcsr::BsToDsstar>::normalized_moment_1_a_30,
+                        std::make_tuple("q2")),
+
+                make_observable("B_c->D^*::V[s^1/s^0](q2)",
+                        &AnalyticFormFactorBToVLCSR<lcsr::BsToDsstar>::normalized_moment_1_v,
+                        std::make_tuple("q2")),
+
+                make_observable("B_c->D^*::T_1[s^1/s^0](q2)",
+                        &AnalyticFormFactorBToVLCSR<lcsr::BsToDsstar>::normalized_moment_1_t_1,
+                        std::make_tuple("q2")),
+
+                make_observable("B_c->D^*::T_23A[s^1/s^0](q2)",
+                        &AnalyticFormFactorBToVLCSR<lcsr::BsToDsstar>::normalized_moment_1_t_23A,
+                        std::make_tuple("q2")),
+
+                make_observable("B_c->D^*::T_23B[s^1/s^0](q2)",
+                        &AnalyticFormFactorBToVLCSR<lcsr::BsToDsstar>::normalized_moment_1_t_23B,
+                        std::make_tuple("q2")),
+            }
+        );
+
+        return ObservableGroup(imp);
+    }
+    // }}}
+
+    // }}}
+
     // B -> P P
     // {{{
 
@@ -1377,6 +1474,9 @@ namespace eos
                 make_bs_to_kstar_form_factors_group(),
                 make_bs_to_phi_form_factors_group(),
                 make_bs_to_dsstar_form_factors_group(),
+
+                // B_c -> V
+                make_bc_to_dstar_form_factors_group(),
 
                 // B -> P P
                 make_b_to_pi_pi_form_factors_group(),

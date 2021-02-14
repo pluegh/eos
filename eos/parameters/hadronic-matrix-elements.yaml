@@ -2522,6 +2522,87 @@ groups:
           min:     2.1213
           max:     2.1213
           comments: ''
+      # parameters for LCSR calculation of B_c->D^* hadronic matrix elements
+      'B_c->D^*::s_0^A1,0@B-LCSR' :
+          central: 8.0
+          min:     8.0
+          max:     8.0
+          comments: 'GeV^2'
+      'B_c->D^*::s_0^A1,1@B-LCSR' :
+          central: 0.0
+          min:     0.0
+          max:     1.0
+          comments: '1'
+      'B_c->D^*::s_0^A2,0@B-LCSR' :
+          central: 8.0
+          min:     8.0
+          max:     8.0
+          comments: 'GeV^2'
+      'B_c->D^*::s_0^A2,1@B-LCSR' :
+          central: 0.0
+          min:     0.0
+          max:     1.0
+          comments: '1'
+      'B_c->D^*::s_0^A30,0@B-LCSR' :
+          central: 8.0
+          min:     8.0
+          max:     8.0
+          comments: 'GeV^2'
+      'B_c->D^*::s_0^A30,1@B-LCSR' :
+          central: 0.0
+          min:     0.0
+          max:     1.0
+          comments: '1'
+      'B_c->D^*::s_0^V,0@B-LCSR' :
+          central: 8.0
+          min:     8.0
+          max:     8.0
+          comments: 'GeV^2'
+      'B_c->D^*::s_0^V,1@B-LCSR' :
+          central: 0.0
+          min:     0.0
+          max:     1.0
+          comments: '1'
+      'B_c->D^*::s_0^T1,0@B-LCSR' :
+          central: 8.0
+          min:     8.0
+          max:     8.0
+          comments: 'GeV^2'
+      'B_c->D^*::s_0^T1,1@B-LCSR' :
+          central: 0.0
+          min:     0.0
+          max:     1.0
+          comments: '1'
+      'B_c->D^*::s_0^T23A,0@B-LCSR' :
+          central: 8.0
+          min:     8.0
+          max:     8.0
+          comments: 'GeV^2'
+      'B_c->D^*::s_0^T23A,1@B-LCSR' :
+          central: 0.0
+          min:     0.0
+          max:     1.0
+          comments: '1'
+      'B_c->D^*::s_0^T23B,0@B-LCSR' :
+          central: 8.0
+          min:     8.0
+          max:     8.0
+          comments: 'GeV^2'
+      'B_c->D^*::s_0^T23B,1@B-LCSR' :
+          central: 0.0
+          min:     0.0
+          max:     1.0
+          comments: '1'
+      'B_c->D^*::M^2@B-LCSR' :
+          central: 4.5
+          min:     3.0
+          max:     6.0
+          comments: 'GeV^2'
+      'B_c->D^*::mu@B-LCSR' :
+          central: 2.1213
+          min:     2.1213
+          max:     2.1213
+          comments: ''
       # parameters for LCSR calculation of B_s->phi hadronic matrix elements
       'B_s->phi::s_0^A1,0@B-LCSR' :
           central: 1.7

@@ -13,6 +13,7 @@ libeosformfactors_la_SOURCES = \
 	analytic-b-to-v-lcsr.hh analytic-b-to-v-lcsr-impl.hh \
 	analytic-bs-to-kstar-lcsr.cc analytic-bs-to-dsstar-lcsr.cc analytic-bs-to-phi-lcsr.cc \
 	analytic-b-to-rho-lcsr.cc analytic-b-to-kstar-lcsr.cc analytic-b-to-dstar-lcsr.cc \
+	analytic-bc-to-dstar-lcsr.cc \
 	baryonic.cc baryonic.hh baryonic-impl.hh \
 	b-lcdas.cc b-lcdas.hh \
 	form-factor-adapter.hh \
