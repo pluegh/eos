@@ -65,7 +65,6 @@ namespace eos
         // renormalization scale
         UsedParameter mu;
 
-        // BMesonLCDAs b_lcdas;
         std::shared_ptr<BMesonLCDAsBase> b_lcdas_ptr;
 
         // switches to enable/disable certain contributions
@@ -96,7 +95,6 @@ namespace eos
             s0_1_t(p[stringify(Process_::B) + "->" + stringify(Process_::P) + "::s_0^T,1@B-LCSR"], u),
             M2(p[stringify(Process_::B) + "->" + stringify(Process_::P) + "::M^2@B-LCSR"], u),
             mu(p[stringify(Process_::B) + "->" + stringify(Process_::P) + "::mu@B-LCSR"], u),
-            // b_lcdas(p, o + Options{ { "q", stringify(Process_::q_s) } }), // operator+ is ordered!
             opt_2pt(o, "2pt", { "tw2+3", "all", "off" }, "all"),
             opt_3pt(o, "3pt", { "tw3+4", "all", "off" }, "all"),
             switch_2pt_phi(1.0),
@@ -126,7 +124,6 @@ namespace eos
                     throw InternalError("Unknown spectator quark flavour: '" + stringify(Process_::q_s) + "'");
             }
             u.uses(*b_lcdas_ptr);
-
 
             switch (Process_::q_v)
             {
@@ -2761,7 +2758,7 @@ namespace eos
                              - surface_fp_3pt_D(sigma_0, q2);
             }
 
-            return f_B() * m_B() / f_P() * (integral_2pt + surface_2pt + integral_3pt + surface_3pt) / ( Process_::chi2);
+            return f_B() * m_B() / f_P() * (integral_2pt + surface_2pt + integral_3pt + surface_3pt) / (Process_::chi2);
         }
 
         double normalized_moment_1_f_p(const double & q2) const
@@ -2769,8 +2766,6 @@ namespace eos
             const double sigma_0 = this->sigma_0(q2, s0_0_p(), s0_1_p());
 
             const std::function<double (const double &)> integrand_2pt_m1 = std::bind(&Implementation::integrand_fp_2pt_borel_m1, this, std::placeholders::_1, q2);
-
-
             const std::function<double (const double &)> integrand_2pt    = std::bind(&Implementation::integrand_fp_2pt_borel, this, std::placeholders::_1, q2);
 
             const double integral_2pt_m1 = integrate<GSL::QAGS>(integrand_2pt_m1, 0.0, sigma_0);
