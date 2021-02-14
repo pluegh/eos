@@ -628,12 +628,13 @@ groups:
           min:     +0.03
           max:     +0.09
           comments: 'GeV^2, cf. [?]'
-      'B_c::N0' :
-          central: +1.65
+      # TODO check if sensible
+      'B_c::delta_N' :
+          central: +0.48
           min:     +0.05
           max:     +0.05
           comments: '1, cf. [?]'
-      'B_c::omega_0' :
+      'B_c::omega_1_plus' :
           central: +1.75
           min:     +0.2
           max:     +0.2
