@@ -2,8 +2,9 @@
 
 /*
  * Copyright (c) 2018 Danny van Dyk
- * Copyright (c) 2018 Ahmet Kokulu
  * Copyright (c) 2018 Nico Gubernari
+ * Copyright (c) 2018 Ahmet Kokulu
+ * Copyright (c) 2021 Philip Lüghausen
  *
  * This file is part of the EOS project. EOS is free software;
  * you can redistribute it and/or modify it under the terms of the GNU General
