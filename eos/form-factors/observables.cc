@@ -1157,31 +1157,31 @@ namespace eos
                         std::make_tuple("q2")),
 
                 make_observable("B_c->D^*::A_1[s^1/s^0](q2)",
-                        &AnalyticFormFactorBToVLCSR<lcsr::BsToDsstar>::normalized_moment_1_a_1,
+                        &AnalyticFormFactorBToVLCSR<lcsr::BcToDstar>::normalized_moment_1_a_1,
                         std::make_tuple("q2")),
 
                 make_observable("B_c->D^*::A_2[s^1/s^0](q2)",
-                        &AnalyticFormFactorBToVLCSR<lcsr::BsToDsstar>::normalized_moment_1_a_2,
+                        &AnalyticFormFactorBToVLCSR<lcsr::BcToDstar>::normalized_moment_1_a_2,
                         std::make_tuple("q2")),
 
                 make_observable("B_c->D^*::A_30[s^1/s^0](q2)",
-                         &AnalyticFormFactorBToVLCSR<lcsr::BsToDsstar>::normalized_moment_1_a_30,
+                         &AnalyticFormFactorBToVLCSR<lcsr::BcToDstar>::normalized_moment_1_a_30,
                         std::make_tuple("q2")),
 
                 make_observable("B_c->D^*::V[s^1/s^0](q2)",
-                        &AnalyticFormFactorBToVLCSR<lcsr::BsToDsstar>::normalized_moment_1_v,
+                        &AnalyticFormFactorBToVLCSR<lcsr::BcToDstar>::normalized_moment_1_v,
                         std::make_tuple("q2")),
 
                 make_observable("B_c->D^*::T_1[s^1/s^0](q2)",
-                        &AnalyticFormFactorBToVLCSR<lcsr::BsToDsstar>::normalized_moment_1_t_1,
+                        &AnalyticFormFactorBToVLCSR<lcsr::BcToDstar>::normalized_moment_1_t_1,
                         std::make_tuple("q2")),
 
                 make_observable("B_c->D^*::T_23A[s^1/s^0](q2)",
-                        &AnalyticFormFactorBToVLCSR<lcsr::BsToDsstar>::normalized_moment_1_t_23A,
+                        &AnalyticFormFactorBToVLCSR<lcsr::BcToDstar>::normalized_moment_1_t_23A,
                         std::make_tuple("q2")),
 
                 make_observable("B_c->D^*::T_23B[s^1/s^0](q2)",
-                        &AnalyticFormFactorBToVLCSR<lcsr::BsToDsstar>::normalized_moment_1_t_23B,
+                        &AnalyticFormFactorBToVLCSR<lcsr::BcToDstar>::normalized_moment_1_t_23B,
                         std::make_tuple("q2")),
             }
         );
